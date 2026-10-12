@@ -89,7 +89,15 @@ cd 3DSM-ABP-UNDEFINED
 <pre><code>docker-compose up --build
 </code></pre>
 
-<p><strong>4. Acesse a aplicação</strong></p>
+<p><strong>4. Prepare o banco e inicie o backend</strong></p>
+<pre><code>cd backend
+npm install
+npm run db:migrate
+npm run start
+</code></pre>
+<p>A migração cria as tabelas Prisma no PostgreSQL. O backend valida conexão e schema antes de iniciar o monitoramento.</p>
+
+<p><strong>5. Acesse a aplicação</strong></p>
 <ul>
     <li>Frontend: <a href="http://localhost:5173">http://localhost:5173</a></li>
     <li>Backend: <a href="http://localhost:3000">http://localhost:3000</a></li>
