@@ -1,11 +1,12 @@
 import { Link, useSearchParams } from 'react-router';
 import Icon from '../components/common/Icon';
 import MetricCard from '../components/common/MetricCard';
-import DashboardEmpty from '../components/dashboard/DashboardEmpty';
 import DashboardDemo from '../components/dashboard/DashboardDemo';
+import LiveDashboard from '../components/dashboard/LiveDashboard';
 import { demoTotals } from '../mocks/dashboard';
 import usePageTitle from '../hooks/usePageTitle';
 import '../components/dashboard/demo.css';
+import '../components/dashboard/live.css';
 
 export default function Dashboard() {
   const [searchParams] = useSearchParams();
@@ -22,21 +23,13 @@ export default function Dashboard() {
             Uma visão clara dos seus serviços e do impacto que eles geram.
           </p>
         </div>
-        <div className="collection-status">
+        {isDemo && <div className="collection-status">
           <Icon name="clock" />
           <div>
-            <strong>
-              {isDemo
-                ? 'Exemplo de 07 de outubro de 2026'
-                : 'Aguardando primeira coleta'}
-            </strong>
-            <span>
-              {isDemo
-                ? 'Atualização simulada às 14:32'
-                : 'Última atualização ainda indisponível'}
-            </span>
+            <strong>Exemplo de 07 de outubro de 2026</strong>
+            <span>Atualização simulada às 14:32</span>
           </div>
-        </div>
+        </div>}
       </div>
       <section
         className={`demo-toolbar${isDemo ? ' demo-toolbar--active' : ''}`}
@@ -67,44 +60,38 @@ export default function Dashboard() {
           <Icon name={isDemo ? 'back' : 'arrow'} />
         </Link>
       </section>
-      <section aria-label="Indicadores gerais" className="metrics-grid">
-        <MetricCard
-          label="Serviços monitorados"
-          value={isDemo ? demoTotals.services : undefined}
-          description={
-            isDemo
-              ? `${demoTotals.active} ativos · ${demoTotals.unavailable} indisponível · ${demoTotals.noMetrics} sem métricas`
-              : 'Disponibilidade da infraestrutura'
-          }
-          icon="server"
-          tone="forest"
-        />
-        <MetricCard
-          label="Energia estimada"
-          value={isDemo ? demoTotals.energyKwh : undefined}
-          unit="kWh"
-          description={
-            isDemo
-              ? 'Total ilustrativo de 07/10/2026'
-              : 'Consumo dos recursos computacionais'
-          }
-          icon="bolt"
-          tone="leaf"
-        />
-        <MetricCard
-          label="Emissões estimadas"
-          value={isDemo ? demoTotals.carbonKg : undefined}
-          unit="kgCO₂e"
-          description={
-            isDemo
-              ? 'Total ilustrativo de 07/10/2026'
-              : 'Dióxido de carbono equivalente'
-          }
-          icon="cloud"
-          tone="olive"
-        />
-      </section>
-      {isDemo ? <DashboardDemo /> : <DashboardEmpty />}
+      {isDemo ? (
+        <>
+          <section aria-label="Indicadores gerais" className="metrics-grid">
+            <MetricCard
+              label="Serviços monitorados"
+              value={demoTotals.services}
+              description={`${demoTotals.active} ativos · ${demoTotals.unavailable} indisponível · ${demoTotals.noMetrics} sem métricas`}
+              icon="server"
+              tone="forest"
+            />
+            <MetricCard
+              label="Energia estimada"
+              value={demoTotals.energyKwh}
+              unit="kWh"
+              description="Total ilustrativo de 07/10/2026"
+              icon="bolt"
+              tone="leaf"
+            />
+            <MetricCard
+              label="Emissões estimadas"
+              value={demoTotals.carbonKg}
+              unit="kgCO₂e"
+              description="Total ilustrativo de 07/10/2026"
+              icon="cloud"
+              tone="olive"
+            />
+          </section>
+          <DashboardDemo />
+        </>
+      ) : (
+        <LiveDashboard />
+      )}
     </div>
   );
 }
