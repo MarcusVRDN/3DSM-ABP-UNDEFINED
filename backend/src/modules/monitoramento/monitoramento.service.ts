@@ -18,15 +18,15 @@ export class MonitoramentoService implements OnModuleInit {
   async onModuleInit() {
     await this.prisma.verifySchema();
 
-    const intervalMs = Number(this.configService.get<number>('METRICS_POLL_INTERVAL_MS') ?? 30000);
+    const configuredInterval = this.configService.get<string>('METRICS_POLL_INTERVAL_MS');
+    const intervalMs = Number(configuredInterval ?? 30000);
     this.startPolling(intervalMs);
   }
 
   private startPolling(intervalMs: number) {
     if (Number.isNaN(intervalMs) || intervalMs <= 0) {
-      this.logger.warn('Intervalo de coleta inválido. Usando 30.000ms.');
-      this.pollOnce();
-      return;
+      this.logger.warn('METRICS_POLL_INTERVAL_MS inválido. Usando 30.000ms.');
+      intervalMs = 30000;
     }
 
     this.pollOnce();
