@@ -90,21 +90,80 @@ O GreenER foi projetado sob fortes diretrizes de acessibilidade e transparência
 
 ---
 
-## 🧪 5. Plano de Avaliação de Usabilidade (IHC05 — Previsto para Sprint 3)
+## 🧪 5. Avaliação de Usabilidade (IHC05)
 
-A avaliação de usabilidade será conduzida no início da Sprint 3 com **5 usuários reais** (estudantes e profissionais de TI):
+### 5.1. Avaliação heurística dos protótipos — registro inicial
 
-### 📋 Roteiro de Teste Proposto:
-1. **Tarefa 1:** Localizar o serviço que consumiu a maior quantidade de energia nas últimas 24 horas.
-2. **Tarefa 2:** Selecionar dois serviços e realizar uma comparação direta de emissão de CO₂e.
-3. **Tarefa 3:** Identificar se existe algum serviço fora do ar no momento e qual sua região de hospedagem.
-4. **Métricas Coletadas:**
-   - Taxa de sucesso na conclusão da tarefa sem assistência.
-   - Tempo médio por tarefa (Time on Task).
-   - Questionário SUS (System Usability Scale) ao final do teste.
+**Atividade:** [PBI-23 — Protótipos e avaliação de usabilidade](https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/23).  
+**Responsável:** Thales Cambraia Dias.  
+**Situação:** avaliação heurística realizada; documentação em consolidação.  
+**Data da avaliação:** a registrar pelo responsável.  
+**Protótipo:** [GreenER no Figma](https://www.figma.com/design/rnEO8oYXAzDEnUbBt2NWwu/GreenER-Figma).
+
+#### Objetivo e método
+
+Verificar a clareza e a organização das telas usando princípios de usabilidade, como feedback, consistência e controle do usuário.
+
+**Telas avaliadas:** dashboard sem dados e com dados demonstrativos, gráficos, lista de serviços e acesso administrativo.
+
+#### Evidências visíveis nos protótipos
+
+As observações das capturas abaixo devem ser confirmadas com as anotações da avaliação realizada pelo responsável.
+
+| Heurística de Nielsen | Evidência visível |
+| --- | --- |
+| H1 — Visibilidade do estado do sistema | Mensagem “Aguardando primeira coleta”, identificação dos dados fictícios e indicação de atualização simulada. |
+| H2 — Correspondência com o mundo real | Rótulos de energia e emissões, unidades kWh e kgCO₂e e explicações dos indicadores no estado vazio. |
+| H3 — Controle e liberdade do usuário | Opções “Voltar ao dashboard” e “Voltar ao estado vazio”; funcionamento a conferir no protótipo navegável. |
+| H4 — Consistência e padrões | Identidade visual verde, cabeçalho e apresentação dos cards seguem um padrão entre as telas. |
+| H8 — Design estético e minimalista | Totais ambientais aparecem em destaque, com gráficos e lista de serviços agrupados em blocos. |
+
+#### Ajustes sugeridos para confirmação
+
+- **Acesso administrativo (H1/H5):** a tela informa que não permite entrar, mas exibe o botão “Entrar”. Avaliar desabilitar a ação ou identificá-la como demonstração.
+- **Leitura:** conferir a legibilidade dos textos menores e o contraste. As capturas não comprovam uma relação de contraste específica.
+
+São sugestões a confirmar; a aplicação dos ajustes ainda não está documentada.
+
+#### Pendências para concluir o registro
+
+- Informar a data real e os resultados da avaliação.
+- Anexar evidências dos achados confirmados e dos ajustes, preferencialmente antes/depois.
+- Justificar quando um ajuste não for necessário.
+
+O teste com usuários da Sprint 3 continua planejado. Este registro não apresenta resultados de participantes ou questionário SUS.
+
+**Referência:** [10 heurísticas de usabilidade de Jakob Nielsen — Nielsen Norman Group](https://www.nngroup.com/articles/ten-usability-heuristics/).
+
+### 5.2. Plano de teste com usuários — previsto para Sprint 3
+
+O teste de usabilidade está planejado para o início da Sprint 3 com **5 usuários reais** (estudantes e profissionais de TI).
+
+#### 📋 Roteiro de teste proposto
+
+1. **Tarefa 1:** localizar o serviço que consumiu a maior quantidade de energia nas últimas 24 horas.
+2. **Tarefa 2:** selecionar dois serviços e comparar suas emissões de CO₂e.
+3. **Tarefa 3:** identificar se existe algum serviço fora do ar e qual sua região de hospedagem.
+
+#### Métricas previstas
+
+- Taxa de sucesso na conclusão das tarefas sem assistência.
+- Tempo de execução por tarefa.
+- Questionário SUS (System Usability Scale) ao final do teste.
 
 ---
 
-## 🚀 6. Melhorias Decorrentes da Avaliação (IHC06 — Previsto para Sprint 3)
+## 🚀 6. Melhorias Decorrentes da Avaliação (IHC06)
 
-Após a realização dos testes com usuários, todos os apontamentos de fricção, dúvidas de usabilidade ou dificuldades visuais serão convertidos em issues do GitHub e implementados no código antes da tag final `sprint-3`.
+As sugestões da avaliação heurística estão registradas na seção 5.1. Após sua confirmação, os ajustes serão acompanhados na atividade #23.
+
+Para cada melhoria, deverão ser registrados:
+
+- Problema identificado e heurística relacionada.
+- Ajuste proposto.
+- Situação do ajuste: pendente, implementado ou validado.
+- Evidências da interface antes e depois da alteração.
+
+Até o momento, a aplicação das sugestões da avaliação heurística não está documentada.
+
+Após os testes com usuários previstos para a Sprint 3, os problemas identificados também serão registrados em issues do GitHub e acompanhados até sua correção e validação.
