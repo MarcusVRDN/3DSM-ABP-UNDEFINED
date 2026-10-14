@@ -24,19 +24,19 @@
 <h2>📎 Links</h2>
 <ul>
     <li>
-        <strong>Trello:</strong>
-        <a href="https://trello.com/b/SEU_BOARD_3DSM" target="_blank">Acessar Trello</a>
+        <strong>GitHub Projects (Kanban):</strong>
+        <a href="https://github.com/users/abpundefined/projects/2" target="_blank">Acessar Kanban</a>
     </li>
     <li>
         <strong>Figma:</strong>
-        <a href="https://www.figma.com/design/SEU_LINK_3DSM" target="_blank">Acessar Figma</a>
+        <a href="https://www.figma.com/design/rnEO8oYXAzDEnUbBt2NWwu/GreenER-Figma?node-id=0-1" target="_blank">Acessar Figma</a>
     </li>
     <li>
-        <strong>Greener Metrics Aggregator API:</strong>
+        <strong>GreenER Metrics Aggregator API:</strong>
         <a href="https://metrics.unilaunch.org/docs" target="_blank">Acessar Documentação</a>
     </li>
     <li>
-        <strong>Greener Carbon Intensity API:</strong>
+        <strong>GreenER Carbon Intensity API:</strong>
         <a href="https://carbon.unilaunch.org/docs" target="_blank">Acessar Documentação</a>
     </li>
 </ul>
