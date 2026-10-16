@@ -34,5 +34,14 @@ services:
     volumes:
       - ./backend/src:/app/src
 
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "127.0.0.1:5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+
 volumes:
   postgres_data:
