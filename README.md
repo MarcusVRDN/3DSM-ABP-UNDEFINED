@@ -29,7 +29,7 @@
     </li>
     <li>
         <strong>Figma:</strong>
-        <a href="https://www.figma.com/design/rnEO8oYXAzDEnUbBt2NWwu/GreenER-Figma?node-id=0-1" target="_blank">Acessar Figma</a>
+        <a href="https://www.figma.com/design/CzTTbJAFqZrm2eUIBTSCNl/Undefined-FatecABP-GreenER?node-id=0-1" target="_blank">Acessar Figma</a>
     </li>
     <li>
         <strong>GreenER Metrics Aggregator API:</strong>
