@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ColetasRepository } from './coletas.repository';
-import { CreateColetaDto } from './dto/create-coleta.dto';
+import { CreateColetaDto, EstadoColetaEnum } from './dto/create-coleta.dto';
 import { FilterColetasDto } from './dto/filter-coleta.dto';
 
 @Injectable()
@@ -8,6 +8,20 @@ export class ColetasService {
   constructor(private readonly coletasRepository: ColetasRepository) {}
 
   async registrarColeta(dto: CreateColetaDto) {
+    const metricasAusentes =
+      dto.cpuPercent === undefined ||
+      dto.cpuPercent === null ||
+      (dto.cpuPercent === 0 &&
+        (dto.memoryGb === null || dto.memoryGb === undefined || dto.memoryGb === 0) &&
+        (dto.diskGb === null || dto.diskGb === undefined || dto.diskGb === 0));
+
+    if (metricasAusentes && dto.estadoColeta !== EstadoColetaEnum.FALHA) {
+      dto.estadoColeta = EstadoColetaEnum.SEM_METRICAS;
+      dto.mensagemErro =
+        dto.mensagemErro ??
+        'Serviço acessível, porém sem medições de consumo disponíveis no payload retornado.';
+    }
+
     return this.coletasRepository.create(dto);
   }
 
@@ -15,13 +29,6 @@ export class ColetasService {
     return this.coletasRepository.findMany(filtros);
   }
 
-  async buscarPorId(id: number) {
-    const coleta = await this.coletasRepository.findById(id);
-    if (!coleta) {
-      throw new NotFoundException(`Coleta com id ${id} não encontrada.`);
-    }
-    return coleta;
-  }
   async obterUltimaColetaValida(servicoId: number) {
     const ultimaColeta = await this.coletasRepository.findLatestSuccessful(servicoId);
 
@@ -36,5 +43,13 @@ export class ColetasService {
       mensagem: 'Dados recuperados da última coleta válida preservada',
       dados: ultimaColeta,
     };
+  }
+
+  async buscarPorId(id: number) {
+    const coleta = await this.coletasRepository.findById(id);
+    if (!coleta) {
+      throw new NotFoundException(`Coleta com id ${id} não encontrada.`);
+    }
+    return coleta;
   }
 }
