@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../database/prisma.service';
-import { normalizeServicePayload, safeArrayFromResponse } from '../../common/utils/external-api.util';
+import { normalizeServicePayload } from '../../common/utils/external-api.util';
 
 @Injectable()
 export class ServicosService {
@@ -29,27 +29,34 @@ export class ServicosService {
       throw new Error(`Falha ao consultar serviços externos: ${response.status} ${response.statusText}`);
     }
 
-    const payload = await response.json();
-    const records = safeArrayFromResponse(payload)
-      .map((item) => normalizeServicePayload(item))
-      .filter(Boolean) as {
-      idExterno: string;
-      nome: string;
-      localizacao: string;
-      cidade: string | null;
-      pais: string | null;
-      regiao: string | null;
-    }[];
+    const payload: unknown = await response.json();
+    const container = payload && typeof payload === 'object'
+      ? payload as Record<string, unknown>
+      : null;
+    const servicePayloads: unknown = Array.isArray(payload)
+      ? payload
+      : ['items', 'data', 'services', 'results', 'value', 'records']
+        .map((key) => container?.[key])
+        .find(Array.isArray);
+
+    if (!Array.isArray(servicePayloads) || container?.error || container?.success === false) {
+      throw new Error('Resposta inválida da descoberta de serviços.');
+    }
+
+    // Valida toda a descoberta antes de alterar estados no banco.
+    const records = servicePayloads.map((item: unknown) => {
+      const service = normalizeServicePayload(item);
+      if (!service) {
+        throw new Error('Serviço inválido na resposta de descoberta.');
+      }
+      return service;
+    });
 
     return records;
   }
 
   async syncServices() {
     const services = await this.discoverServices();
-
-    if (services.length === 0) {
-      return [];
-    }
 
     const discoveredIds = new Set<string>();
 
@@ -84,7 +91,8 @@ export class ServicosService {
           nome: service.nome,
           regiaoCodigo: regiaoCodigo,
           caminhoMetricas: `/metrics/${service.idExterno}`,
-          estadoAtual: 'DISPONIVEL',
+          // A descoberta só confirma que o serviço existe; quem confirma disponibilidade é a coleta de métricas.
+          // Preservamos o estado atual para a sincronização não apagar uma falha antes da próxima coleta.
           ultimaVezListadoEm: new Date(),
           atualizadoEm: new Date(),
         },
@@ -93,9 +101,24 @@ export class ServicosService {
           nome: service.nome,
           regiaoCodigo: regiaoCodigo,
           caminhoMetricas: `/metrics/${service.idExterno}`,
-          estadoAtual: 'DISPONIVEL',
+          estadoAtual: 'DESCONHECIDO',
           descobertoEm: new Date(),
           ultimaVezListadoEm: new Date(),
+          atualizadoEm: new Date(),
+        },
+      });
+    }
+
+    // Apenas serviços removidos que reapareceram aguardam uma nova coleta.
+    // Os demais preservam o estado determinado pela última coleta.
+    if (discoveredIds.size > 0) {
+      await this.prisma.servico.updateMany({
+        where: {
+          idExterno: { in: [...discoveredIds] },
+          estadoAtual: 'REMOVIDO',
+        },
+        data: {
+          estadoAtual: 'DESCONHECIDO',
           atualizadoEm: new Date(),
         },
       });

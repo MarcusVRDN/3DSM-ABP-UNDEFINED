@@ -35,7 +35,7 @@ não a configuração de publicação da aplicação.
 
 ## Páginas e navegação
 
-- `/`: dashboard público inicial, com indicadores sem valores e estado vazio.
+- `/`: dashboard público conectado ao backend para exibir serviços e coletas recentes.
 - `/?demo=1`: demonstração opcional com gráficos e serviços fictícios para avaliação visual. Também pode ser aberta pelo botão **Ver demonstração**.
 - `/login`: formulário administrativo; o acesso ainda está indisponível. Não envia nem armazena credenciais.
 - Outros endereços: página 404 com retorno ao dashboard.
@@ -43,21 +43,23 @@ não a configuração de publicação da aplicação.
 React Router usa `BrowserRouter`, `Routes`, `Outlet` e links de navegação.
 As páginas são carregadas sob demanda com feedback e recuperação de falhas.
 O hook `usePageTitle` atualiza o título da aba. Há link para pular ao conteúdo,
-foco visível e ajuste do foco ao navegar.
+foco visível e ajuste do foco ao navegar. O tema claro é o padrão; os botões
+de lua e sol no cabeçalho alternam entre tema escuro e claro, e a preferência
+fica salva no navegador.
 
 A fonte Figtree é local; as cores seguem a paleta do PO.
-Métricas reais (#7/#8), autenticação (#15) e demais telas continuam em suas issues.
+Energia e emissões aguardam os cálculos correspondentes no backend; autenticação
+(#15) e demais telas continuam em suas issues.
 Leia [o guia da segunda parte](../docs/frontend-interface.md), com decisões,
 arquitetura, rubrica e capturas das telas.
 
 ## Backend e proxy
 
 O serviço `src/services/api.ts` chama caminhos relativos em `/api`.
-O Vite encaminha essas chamadas para `http://localhost:3000`.
-
-O backend atual ainda não tem prefixo global `/api`; o proxy remove esse
-prefixo por padrão: `/api/services` vira `/services` no backend.
-Esse exemplo não significa que a rota de serviços já esteja implementada.
+O Vite encaminha essas chamadas para `http://localhost:3000`, removendo o
+prefixo `/api` por padrão. O dashboard consulta `/servicos` e a coleta válida
+mais recente de cada serviço em `/coletas/servico/:id/ultima-valida`.
+O mesmo proxy está configurado para desenvolvimento e preview.
 
 Os padrões funcionam sem criar `.env`. Para personalizar:
 
@@ -74,9 +76,12 @@ Reinicie o Vite depois de alterar o ambiente. Essas variáveis são lidas
 na configuração do servidor; não recebem prefixo `VITE_` nem são expostas
 pelo mecanismo de ambiente do navegador.
 
-Em Docker, coordenar com a #22 o nome do serviço e usar, por exemplo,
-`API_PROXY_TARGET=http://backend:3000` e o comando
-`npm run dev -- --host 0.0.0.0`. O Compose ainda não inclui o frontend.
+No Docker Compose, o serviço frontend recebe
+`API_PROXY_TARGET=http://backend:3000`: o Vite acessa o backend pelo nome do
+serviço na rede dos containers. O Dockerfile inicia o Vite com
+`--host 0.0.0.0`, e o frontend fica disponível em http://localhost:5173.
+Assim, `/api/servicos` é encaminhado para `http://backend:3000/servicos`.
+Fora do Docker, o destino padrão continua sendo `http://localhost:3000`.
 
 ## Serviço HTTP
 
@@ -115,8 +120,17 @@ em 360, 390, 768 e 1440 px quanto a overflow, e as capturas de desktop e celular
 foram revisadas. Axe não encontrou violações nas regras executadas nas três páginas.
 
 O proxy foi verificado na parte 1 com servidor HTTP temporário, em sucesso,
-erro e backend indisponível. A integração com NestJS/PostgreSQL real, execução
-pelo Compose oficial, aprovação no Figma e revisão por outro integrante permanecem pendentes.
+erro e backend indisponível. Em 18/10/2026, a integração pelo Compose com
+NestJS/PostgreSQL reais também passou: a página inicial respondeu HTTP 200,
+e `/api/servicos` retornou HTTP 200 com os mesmos 8 serviços consultados no banco.
+O build e os 7 testes HTTP passaram. O Vite iniciou com `--host 0.0.0.0`,
+sem erros de proxy nos logs das requisições verificadas.
+
+O destino local padrão e a reescrita também foram conferidos com um Vite e um
+backend temporários, sem `API_PROXY_TARGET`, dentro do container. A execução
+nativa no Windows não foi repetida: o host tem Node 22, enquanto o frontend
+documenta Node 24, e não há dependências do frontend instaladas no host.
+A aprovação no Figma e a revisão por outro integrante permanecem pendentes.
 
 Leia também [o guia da base técnica para iniciantes](../docs/frontend-setup.md).
 
