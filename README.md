@@ -68,58 +68,22 @@
 
 <h2 id="comorodar">🚀 Como Rodar o Projeto</h2>
 
-<h3>Pré-requisitos</h3>
+<p>O ambiente completo usa Docker Desktop em execução, com containers Linux. Na raiz:</p>
+<pre><code>Copy-Item .env.example .env
+</code></pre>
+<p>Preencha as credenciais e a porta do PostgreSQL no arquivo antes de iniciar. Leia o <a href="./docs/execucao.md">guia de execução</a> para exemplos de variáveis e para escolher entre Docker completo e desenvolvimento nativo.</p>
+<pre><code>docker compose config --quiet
+docker compose up --build
+</code></pre>
+<p>O backend containerizado já gera o Prisma Client, aplica as migrações e inicia o servidor. Não inicie outro backend nas mesmas portas após subir o Compose completo.</p>
 <ul>
-    <li><a href="https://www.docker.com/" target="_blank">Docker</a></li>
-    <li><a href="https://docs.docker.com/compose/" target="_blank">Docker Compose</a></li>
+  <li>Frontend: <a href="http://localhost:5173">http://localhost:5173</a>.</li>
+  <li>API direta: <a href="http://localhost:3000/servicos">http://localhost:3000/servicos</a>.</li>
+  <li>API pelo proxy: <a href="http://localhost:5173/api/servicos">http://localhost:5173/api/servicos</a>.</li>
+  <li>Demonstração com dados fictícios: <a href="http://localhost:5173/?demo=1">http://localhost:5173/?demo=1</a>.</li>
 </ul>
-
-<h3>Passo a passo</h3>
-<p><strong>1. Clone o repositório</strong></p>
-<pre><code>git clone https://github.com/abpundefined/3DSM-ABP-UNDEFINED.git
-cd 3DSM-ABP-UNDEFINED
-</code></pre>
-
-<p><strong>2. Configure as variáveis de ambiente</strong></p>
-<pre><code>cp .env.example .env
-</code></pre>
-<p>Edite o arquivo <code>.env</code> com as chaves necessárias (incluindo <code>JWT_SECRET</code>, credenciais do banco e URLs das APIs auxiliares).</p>
-
-<p><strong>3. Suba os containers</strong></p>
-<pre><code>docker-compose up --build
-</code></pre>
-
-<p><strong>4. Prepare o banco e inicie o backend</strong></p>
-<pre><code>cd backend
-npm install
-npm run db:migrate
-npm run start
-</code></pre>
-<p>A migração cria as tabelas Prisma no PostgreSQL. O backend valida conexão e schema antes de iniciar o monitoramento.</p>
-
-<p><strong>5. Acesse a aplicação</strong></p>
-<ul>
-    <li>Frontend: <a href="http://localhost:5173">http://localhost:5173</a></li>
-    <li>Backend: <a href="http://localhost:3000">http://localhost:3000</a></li>
-</ul>
-
-<h3>Frontend: execução local independente</h3>
-<p>A base do frontend pode ser executada sem iniciar o backend. Use Node 24.x e npm 11.x.</p>
-<pre><code>cd frontend
-npm.cmd ci
-npm.cmd run dev
-</code></pre>
-<p>Acesse <a href="http://localhost:5173">http://localhost:5173</a>.
-No PowerShell, <code>npm.cmd</code> evita o bloqueio de <code>npm.ps1</code>;
-em outros terminais, <code>npm</code> também funciona.</p>
-<p>Leia o <a href="./frontend/README.md">guia rápido do frontend</a> e
-o <a href="./docs/frontend-setup.md">guia detalhado da implementação</a>.
-A integração completa em Docker e as páginas/rotas ainda estão em desenvolvimento.</p>
-
-<h3>Para resetar o banco de dados</h3>
-<pre><code>docker-compose down -v
-docker-compose up --build
-</code></pre>
+<p>A lista e as últimas coletas já são consumidas do backend. Energia/CO₂e reais, autenticação e análises avançadas ainda não estão implementados. O teste completo dos três containers permanece pendente de homologação registrada. Consulte a <a href="./docs/sprints/revisao-sprint-1.md">revisão técnica e seus limites</a>.</p>
+<p>Execução nativa exige Node 24.x/npm 11.x e ambiente configurado na pasta do backend; instruções em <a href="./backend/README.md">backend/README.md</a> e <a href="./frontend/README.md">frontend/README.md</a>. As rotas implementadas estão na <a href="./docs/api.md">documentação da API</a>.</p>
 
 <hr>
 
@@ -328,10 +292,10 @@ docker-compose up --build
     <li>
         <a href="#documentacao">🗎 Documentação</a>
         <ul>
-            <li><a href="#bancodedados">🗃️ Banco de dados</a></li>
-            <li><a href="#casosdeuso">📊 Diagrama de casos de uso</a></li>
-            <li><a href="#classes">📊 Diagrama de classes</a></li>
-            <li><a href="#ihc">🎨 Protótipos IHC e Usabilidade</a></li>
+            <li><a href="./backend/prisma/schema.prisma">🗃️ Modelo do banco (Prisma)</a></li>
+            <li><a href="./docs/interface.md">📊 Personas e fluxos previstos</a></li>
+            <li><a href="./docs/arquitetura.md">📊 Arquitetura atual</a></li>
+            <li><a href="./docs/interface.md">🎨 Protótipos IHC e Usabilidade</a></li>
         </ul>
     </li>
     <li>
@@ -361,75 +325,31 @@ docker-compose up --build
 
 <h3 id="sprint1">⏱️ Sprint 1 — Descoberta, Coleta de Métricas e Estrutura Base 🥇</h3>
 <h4 id="backlogsprint1">📋 Backlog Sprint 1</h4>
+<p>Baseline preservada: <strong>13 itens e 60 SP</strong>. Situação técnica recomendada após a revisão de 19/10/2026: 8 itens em revisão, 5 com correções pendentes e nenhum Done com aceite comprovado. As colunas do Projects ainda precisam de sincronização por alguém com permissão.</p>
 <table>
-    <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>Pontos</th>
-        <th>Status</th>
-        <th>Requisitos Atendidos</th>
-    </tr>
-    <tr>
-        <td colspan="5"><strong>📖 Levantamento e Modelagem</strong></td>
-    </tr>
-    <tr>
-        <td>1</td>
-        <td>Modelagem do banco e entidades ORM</td>
-        <td>5</td>
-        <td>🔄 A Fazer</td>
-        <td>RP03, RNF08</td>
-    </tr>
-    <tr>
-        <td>2</td>
-        <td>Criação do Diagrama de Casos de Uso e Arquitetura</td>
-        <td>3</td>
-        <td>🔄 A Fazer</td>
-        <td>RNF08</td>
-    </tr>
-    <tr>
-        <td colspan="5"><strong>🔙 Backend NestJS</strong></td>
-    </tr>
-    <tr>
-        <td>3</td>
-        <td>Configuração inicial do NestJS com Docker e PostgreSQL</td>
-        <td>3</td>
-        <td>🔄 A Fazer</td>
-        <td>RP02, RP03, RP05</td>
-    </tr>
-    <tr>
-        <td>4</td>
-        <td>Service de integração com Agregador de Métricas e Carbon Intensity</td>
-        <td>5</td>
-        <td>🔄 A Fazer</td>
-        <td>RF01, RF03, RP04</td>
-    </tr>
-    <tr>
-        <td colspan="5"><strong>🎨 Frontend Inicial</strong></td>
-    </tr>
-    <tr>
-        <td>5</td>
-        <td>Setup do projeto React + TypeScript com Vite e Docker</td>
-        <td>2</td>
-        <td>🔄 A Fazer</td>
-        <td>RP01, RP05</td>
-    </tr>
-    <tr>
-        <td>6</td>
-        <td>Componentes base de visualização e layout</td>
-        <td>3</td>
-        <td>🔄 A Fazer</td>
-        <td>RNF01, RNF02</td>
-    </tr>
+<tr><th>Issue</th><th>Item</th><th>SP</th><th>Situação técnica recomendada</th></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/1">#1</a></td><td>[PBI-01] Descoberta automática de serviços</td><td>5</td><td>In progress</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/2">#2</a></td><td>[PBI-02] Monitoramento dinâmico de serviços</td><td>8</td><td>In review</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/3">#3</a></td><td>[PBI-03] Coleta periódica de métricas</td><td>5</td><td>In progress</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/4">#4</a></td><td>[PBI-04] Detecção de serviço indisponível</td><td>3</td><td>In review</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/5">#5</a></td><td>[PBI-05] Detecção de ausência de métricas</td><td>3</td><td>In progress</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/9">#9</a></td><td>[PBI-09] Histórico de coletas</td><td>5</td><td>In review</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/18">#18</a></td><td>[PBI-18] Tolerância a falhas</td><td>5</td><td>In progress</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/22">#22</a></td><td>[PBI-22] Setup Docker Compose</td><td>5</td><td>In review</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/23">#23</a></td><td>[PBI-23] Protótipos e avaliação de usabilidade (IHC)</td><td>8</td><td>In progress</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/24">#24</a></td><td>[TASK] Setup da estrutura base do backend NestJS com TypeScript</td><td>3</td><td>In review</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/25">#25</a></td><td>[TASK] Setup da estrutura base do frontend React com TypeScript e Vite</td><td>3</td><td>In review</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/26">#26</a></td><td>[TASK] Configuração de variáveis de ambiente e segurança (.env.example)</td><td>2</td><td>In review</td></tr>
+<tr><td><a href="https://github.com/abpundefined/3DSM-ABP-UNDEFINED/issues/27">#27</a></td><td>[TASK] Modelagem relacional e migrações PostgreSQL via ORM</td><td>5</td><td>In review</td></tr>
 </table>
-
+<p><a href="./docs/sprints/sprint-1.md">Registro da sprint e contribuições</a> · <a href="./docs/sprints/revisao-sprint-1.md">Evidências e pendências por item</a>.</p>
 <h4 id="burndownsprint1">📉 Burndown Sprint 1</h4>
-<p><em>A ser adicionado durante a execução da sprint.</em></p>
-
+<p><a href="./docs/burndown-sprint-1.md">Base e regras preparadas</a>, com <a href="./docs/metricas/sprint-1/escopo.csv">baseline dos 13 itens</a> e ledger de aceites. O gráfico aguarda início real, corte e registros verificáveis; não foram inventadas datas históricas de conclusão.</p>
 <hr>
 
 <h3 id="sprint2">⏱️ Sprint 2 — Cálculos Ambientais, Dashboard e Autenticação 🥈</h3>
 <h4 id="backlogsprint2">📋 Backlog Sprint 2</h4>
-<p><em>Em planejamento.</em></p>
+<p>Planejamento futuro: consulte <a href="./docs/sprints/sprint-2.md">Sprint 2</a> e <a href="./docs/sprints/sprint-3.md">Sprint 3</a> para os candidatos com IDs e pontos reconciliados. A seleção depende da capacidade de cada ciclo.</p>
 <h4 id="burndownsprint2">📉 Burndown Sprint 2</h4>
 <p><em>A definir.</em></p>
 
@@ -437,7 +357,7 @@ docker-compose up --build
 
 <h3 id="sprint3">⏱️ Sprint 3 — Ranking, Comparações, IHC e Finalização 🥉</h3>
 <h4 id="backlogsprint3">📋 Backlog Sprint 3</h4>
-<p><em>Em planejamento.</em></p>
+<p>Planejamento futuro: consulte <a href="./docs/sprints/sprint-2.md">Sprint 2</a> e <a href="./docs/sprints/sprint-3.md">Sprint 3</a> para os candidatos com IDs e pontos reconciliados. A seleção depende da capacidade de cada ciclo.</p>
 <h4 id="burndownsprint3">📉 Burndown Sprint 3</h4>
 <p><em>A definir.</em></p>
 
