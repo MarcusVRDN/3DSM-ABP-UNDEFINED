@@ -1,11 +1,14 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test('rotas, histórico, foco e estado vazio funcionam sem backend', async ({
+test('rotas, histórico, foco e painel conectado funcionam sem backend', async ({
   page,
 }) => {
   const failures: string[] = [];
   page.on('pageerror', (error) => failures.push(error.message));
+  await page.route('**/api/servicos', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+  );
   await page.goto('/');
   await expect(page).toHaveTitle('Dashboard | GreenER');
   await expect(
@@ -14,13 +17,7 @@ test('rotas, histórico, foco e estado vazio funcionam sem backend', async ({
   await expect(page.getByLabel('Indicadores gerais')).toContainText('kWh');
   await expect(page.getByLabel('Indicadores gerais')).toContainText('kgCO₂e');
   await expect(
-    page.getByRole('heading', { name: 'Seu monitoramento começa aqui' }),
-  ).toBeVisible();
-  await page
-    .getByText('Como funciona o monitoramento', { exact: false })
-    .click();
-  await expect(
-    page.getByText('Descobrir os serviços.', { exact: true }),
+    page.getByRole('heading', { name: 'Nenhum serviço encontrado' }),
   ).toBeVisible();
   await page.getByRole('link', { name: 'Entrar', exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
@@ -77,7 +74,39 @@ test('login valida os campos e informa indisponibilidade sem transmitir credenci
     local: Object.keys(localStorage),
     session: Object.keys(sessionStorage),
   }));
-  expect(storage).toEqual({ local: [], session: [] });
+  expect(storage.local).not.toContain('credentials');
+  expect(storage.local).not.toContain('auth-token');
+  expect(storage.session).toEqual([]);
+});
+
+test('alternância de tema usa claro por padrão e mantém a escolha salva', async ({
+  page,
+}) => {
+  await page.route('**/api/servicos', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+  );
+  await page.goto('/');
+
+  const darkMode = page.getByRole('button', { name: 'Modo escuro' });
+  const lightMode = page.getByRole('button', { name: 'Modo claro' });
+
+  await expect(darkMode).toHaveAttribute('aria-pressed', 'false');
+  await expect(lightMode).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+
+  await darkMode.click();
+  await expect(darkMode).toHaveAttribute('aria-pressed', 'true');
+  await expect(lightMode).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  const darkModeAccessibility = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+    .analyze();
+  expect(darkModeAccessibility.violations).toEqual([]);
+
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await lightMode.click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
 test('link de salto permite chegar ao conteúdo usando teclado', async ({

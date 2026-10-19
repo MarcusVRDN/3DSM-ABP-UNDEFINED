@@ -8,7 +8,14 @@ test('demonstração tem gráficos interativos, dados coerentes e nenhum acesso 
   page.on('request', (request) => {
     if (request.url().includes('/api/')) apiRequests.push(request.url());
   });
+  await page.route('**/api/servicos', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+  );
   await page.goto('/');
+  await expect(
+    page.getByRole('heading', { name: 'Nenhum serviço encontrado' }),
+  ).toBeVisible();
+  apiRequests.length = 0;
   await page.getByRole('link', { name: 'Ver demonstração' }).click();
   await expect(page).toHaveURL(/\?demo=1$/);
   await expect(page).toHaveTitle('Dashboard · demonstração | GreenER');
@@ -54,11 +61,11 @@ test('demonstração tem gráficos interativos, dados coerentes e nenhum acesso 
   await expect(page.getByLabel('Modo de visualização')).toContainText(
     'Dados fictícios',
   );
+  expect(apiRequests).toEqual([]);
   await page.getByRole('link', { name: 'Voltar ao estado vazio' }).click();
   await expect(
-    page.getByRole('heading', { name: 'Seu monitoramento começa aqui' }),
+    page.getByRole('heading', { name: 'Nenhum serviço encontrado' }),
   ).toBeVisible();
-  expect(apiRequests).toEqual([]);
 });
 
 test('demonstração é acessível e responsiva', async ({ page }, testInfo) => {
