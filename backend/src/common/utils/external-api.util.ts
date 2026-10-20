@@ -1,7 +1,7 @@
 type JsonRecord = Record<string, any>;
 
 const toObject = (value: unknown): JsonRecord | null => {
-  if (!value || typeof value !== 'object') {
+  if (!value || typeof value !== "object") {
     return null;
   }
 
@@ -13,12 +13,12 @@ const toArray = (value: unknown): unknown[] => {
     return value;
   }
 
-  if (!value || typeof value !== 'object') {
+  if (!value || typeof value !== "object") {
     return [];
   }
 
   const record = value as JsonRecord;
-  const candidates = ['items', 'data', 'services', 'results', 'value'];
+  const candidates = ["items", "data", "services", "results", "value"];
 
   for (const key of candidates) {
     const candidate = record[key];
@@ -27,11 +27,14 @@ const toArray = (value: unknown): unknown[] => {
     }
   }
 
-  const firstArray = Object.values(record).find((entry) => Array.isArray(entry));
+  const firstArray = Object.values(record).find((entry) =>
+    Array.isArray(entry),
+  );
   return firstArray ? (firstArray as unknown[]) : [];
 };
 
-const normalizeKey = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]/g, '');
+const normalizeKey = (value: string): string =>
+  value.toLowerCase().replace(/[^a-z0-9]/g, "");
 
 const findCandidate = (record: JsonRecord, keys: string[]): unknown => {
   const lookup = new Map<string, unknown>();
@@ -50,7 +53,11 @@ const findCandidate = (record: JsonRecord, keys: string[]): unknown => {
   return undefined;
 };
 
-export const findString = (record: JsonRecord | null, keys: string[], fallback = ''): string => {
+export const findString = (
+  record: JsonRecord | null,
+  keys: string[],
+  fallback = "",
+): string => {
   if (!record) {
     return fallback;
   }
@@ -60,24 +67,32 @@ export const findString = (record: JsonRecord | null, keys: string[], fallback =
     return fallback;
   }
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return value.trim();
   }
 
-  if (typeof value === 'number' || typeof value === 'boolean') {
+  if (typeof value === "number" || typeof value === "boolean") {
     return String(value);
   }
 
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const nested = value as JsonRecord;
-    const direct = findString(nested, ['name', 'title', 'label', 'value'], fallback);
+    const direct = findString(
+      nested,
+      ["name", "title", "label", "value"],
+      fallback,
+    );
     return direct || fallback;
   }
 
   return fallback;
 };
 
-export const findNumber = (record: JsonRecord | null, keys: string[], fallback?: number): number | undefined => {
+export const findNumber = (
+  record: JsonRecord | null,
+  keys: string[],
+  fallback?: number,
+): number | undefined => {
   if (!record) {
     return fallback;
   }
@@ -106,7 +121,7 @@ export const safeArrayFromResponse = (payload: unknown): unknown[] => {
     return direct;
   }
 
-  for (const key of ['data', 'result', 'items', 'services', 'records']) {
+  for (const key of ["data", "result", "items", "services", "records"]) {
     const nested = root[key];
     if (Array.isArray(nested)) {
       return nested;
@@ -123,17 +138,66 @@ export const normalizeServicePayload = (payload: unknown) => {
   }
 
   const id =
-    findCandidate(source, ['id', 'serviceId', 'service_id', 'uuid', 'identifier', 'externalId', 'serviceID']) ??
-    findString(source, ['id', 'serviceId', 'service_id', 'uuid', 'identifier', 'externalId', 'serviceID']);
+    findCandidate(source, [
+      "id",
+      "serviceId",
+      "service_id",
+      "uuid",
+      "identifier",
+      "externalId",
+      "serviceID",
+    ]) ??
+    findString(source, [
+      "id",
+      "serviceId",
+      "service_id",
+      "uuid",
+      "identifier",
+      "externalId",
+      "serviceID",
+    ]);
 
-  const name = findString(source, ['name', 'title', 'serviceName', 'service', 'label', 'displayName']);
-  const location = findString(source, ['location', 'localizacao', 'locationName', 'location_name', 'place']);
-  const city = findString(source, ['city', 'cidade', 'municipio', 'locationCity']);
-  const country = findString(source, ['country', 'pais', 'countryName', 'locationCountry']);
-  const region = findString(source, ['region', 'regiao', 'zone', 'state']);
+  const name = findString(source, [
+    "name",
+    "title",
+    "serviceName",
+    "service",
+    "label",
+    "displayName",
+  ]);
+  const locationData = toObject(
+    findCandidate(source, ["location", "localizacao"]),
+  );
 
-  const normalizedId = String(id ?? '').trim();
-  const normalizedName = String(name ?? '').trim();
+  const city =
+    findString(locationData, ["city", "cidade", "municipio"]) ||
+    findString(source, ["city", "cidade", "municipio", "locationCity"]);
+
+  const country =
+    findString(locationData, ["country", "pais", "countryName"]) ||
+    findString(source, ["country", "pais", "countryName", "locationCountry"]);
+
+  const region =
+    findString(locationData, ["region", "regiao", "zone", "state"]) ||
+    findString(source, ["region", "regiao", "zone", "state"]);
+
+  const location =
+    (typeof source.location === "string" ? source.location.trim() : "") ||
+    findString(source, ["locationName", "location_name", "place"]) ||
+    city ||
+    region ||
+    country;
+
+  const regiaoCodigo = findString(locationData, ["region_code", "regionCode"]);
+
+  const latitude = findNumber(locationData, ["latitude", "lat"]);
+
+  const longitude = findNumber(locationData, ["longitude", "lon", "lng"]);
+
+  const caminhoMetricas = findString(source, ["metrics_path", "metricsPath"]);
+
+  const normalizedId = String(id ?? "").trim();
+  const normalizedName = String(name ?? "").trim();
 
   if (!normalizedId || !normalizedName) {
     return null;
@@ -142,10 +206,14 @@ export const normalizeServicePayload = (payload: unknown) => {
   return {
     idExterno: normalizedId,
     nome: normalizedName,
-    localizacao: location || `${city || region || country || 'Desconhecida'}`,
+    localizacao: location || "Desconhecida",
     cidade: city || null,
     pais: country || null,
     regiao: region || null,
+    regiaoCodigo: regiaoCodigo || null,
+    latitude: latitude ?? null,
+    longitude: longitude ?? null,
+    caminhoMetricas: caminhoMetricas || `/metrics/${normalizedId}`,
   };
 };
 
@@ -157,19 +225,50 @@ export const normalizeMetricPayload = (payload: unknown) => {
 
   const metricCandidates = [
     source,
-    ...Object.values(source).filter((value) => value && typeof value === 'object').map((value) => toObject(value) ?? {}),
+    ...Object.values(source)
+      .filter((value) => value && typeof value === "object")
+      .map((value) => toObject(value) ?? {}),
   ];
 
   const values: Record<string, number | undefined> = {};
 
   for (const candidate of metricCandidates) {
     const metrics = candidate as JsonRecord;
-    values.cpuPercent = findNumber(metrics, ['cpu_percent', 'cpuPercent', 'cpu', 'cpuUsage', 'usageCpu']);
-    values.memoryGb = findNumber(metrics, ['memory_gb', 'memoryGb', 'memory', 'memoryUsage', 'ramGb']);
-    values.diskGb = findNumber(metrics, ['disk_gb', 'diskGb', 'disk', 'diskUsage', 'storageGb']);
-    values.networkGb = findNumber(metrics, ['network_gb', 'networkGb', 'network', 'networkUsage', 'trafficGb']);
+    values.cpuPercent = findNumber(metrics, [
+      "cpu_percent",
+      "cpuPercent",
+      "cpu",
+      "cpuUsage",
+      "usageCpu",
+    ]);
+    values.memoryGb = findNumber(metrics, [
+      "memory_gb",
+      "memoryGb",
+      "memory",
+      "memoryUsage",
+      "ramGb",
+    ]);
+    values.diskGb = findNumber(metrics, [
+      "disk_gb",
+      "diskGb",
+      "disk",
+      "diskUsage",
+      "storageGb",
+    ]);
+    values.networkGb = findNumber(metrics, [
+      "network_gb",
+      "networkGb",
+      "network",
+      "networkUsage",
+      "trafficGb",
+    ]);
 
-    if (values.cpuPercent != null || values.memoryGb != null || values.diskGb != null || values.networkGb != null) {
+    if (
+      values.cpuPercent != null ||
+      values.memoryGb != null ||
+      values.diskGb != null ||
+      values.networkGb != null
+    ) {
       break;
     }
   }
