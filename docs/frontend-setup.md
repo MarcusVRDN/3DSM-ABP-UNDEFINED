@@ -1,5 +1,7 @@
 # Como foi criada a base do frontend GreenER
 
+> Registro histórico da implementação inicial. Para o comportamento atual, consulte [execução](execucao.md), [API](api.md) e [revisão da Sprint 1](sprints/revisao-sprint-1.md). O dashboard `/` agora consome o backend; a demonstração continua separada.
+
 **Task:** #25 — parte de Rainan Reis
 **Data:** 06/10/2026
 **Branch:** `feat/25-frontend-base`

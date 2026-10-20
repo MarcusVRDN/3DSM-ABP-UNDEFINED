@@ -6,7 +6,7 @@ Adicionado a pedido do PO para avaliar como os gráficos ficam sobre a interface
 
 Com o frontend em execução, acesse **http://localhost:5173/?demo=1** ou clique em **Ver demonstração** no dashboard. **Voltar ao estado vazio** retorna ao painel inicial. O parâmetro da URL preserva o modo ao atualizar ou compartilhar o endereço local; não é gravado em storage.
 
-O aviso **Modo demonstração · Dados fictícios** permanece acima dos indicadores. Datas, status e valores são exemplos, identificados como simulados. O modo padrão `/` continua sem valores até a integração real.
+O aviso **Modo demonstração · Dados fictícios** permanece acima dos indicadores. Datas, status e valores são exemplos, identificados como simulados. O modo padrão `/` agora consulta serviços e coletas reais no backend; os gráficos desta demonstração continuam fictícios e separados da integração.
 
 ## Decisões de design
 

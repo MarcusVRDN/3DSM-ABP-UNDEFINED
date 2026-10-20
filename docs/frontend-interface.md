@@ -1,5 +1,7 @@
 # Interface base do GreenER — task #25, parte 2
 
+> Registro histórico da implementação inicial. Para o comportamento atual, consulte [execução](execucao.md), [API](api.md) e [revisão da Sprint 1](sprints/revisao-sprint-1.md). O dashboard `/` agora consome o backend; a demonstração continua separada.
+
 Responsável: Rainan Reis. Implementação em 08/10/2026, na branch `feat/25-frontend-layout`, criada da `develop` após `git pull --ff-only origin develop`.
 
 ## Contrato de design
