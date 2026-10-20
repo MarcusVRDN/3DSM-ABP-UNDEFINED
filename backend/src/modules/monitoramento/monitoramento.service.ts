@@ -97,7 +97,7 @@ export class MonitoramentoService implements OnModuleInit {
 
       const payload = await response.json();
       const metrics = normalizeMetricPayload(payload);
-      const hasMetrics = metrics && Object.values(metrics).some((value) => value != null && Number.isFinite(value));
+      const hasMetrics = metrics && Object.values(metrics).some((value) => value != null && Number.isFinite(value) && value !== 0);
 
       if (!hasMetrics) {
         await this.prisma.servico.update({

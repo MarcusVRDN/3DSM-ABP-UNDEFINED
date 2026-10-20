@@ -217,6 +217,28 @@ export const normalizeServicePayload = (payload: unknown) => {
   };
 };
 
+export const hasMeaningfulMetricValue = (
+  metrics:
+    | {
+        cpuPercent?: number | null;
+        memoryGb?: number | null;
+        diskGb?: number | null;
+        networkGb?: number | null;
+      }
+    | null
+    | undefined,
+): boolean => {
+  if (!metrics) {
+    return false;
+  }
+
+  const values = [metrics.cpuPercent, metrics.memoryGb, metrics.diskGb, metrics.networkGb];
+
+  return values.some(
+    (value) => typeof value === 'number' && Number.isFinite(value) && value !== 0,
+  );
+};
+
 export const normalizeMetricPayload = (payload: unknown) => {
   const source = toObject(payload);
   if (!source) {
@@ -263,12 +285,7 @@ export const normalizeMetricPayload = (payload: unknown) => {
       "trafficGb",
     ]);
 
-    if (
-      values.cpuPercent != null ||
-      values.memoryGb != null ||
-      values.diskGb != null ||
-      values.networkGb != null
-    ) {
+    if (hasMeaningfulMetricValue(values)) {
       break;
     }
   }

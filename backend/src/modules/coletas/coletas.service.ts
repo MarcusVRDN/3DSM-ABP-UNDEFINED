@@ -8,12 +8,13 @@ export class ColetasService {
   constructor(private readonly coletasRepository: ColetasRepository) {}
 
   async registrarColeta(dto: CreateColetaDto) {
-    const semMedicoes =
-      dto.cpuPercent === undefined ||
-      dto.cpuPercent === null ||
-      (dto.cpuPercent === 0 &&
-        (dto.memoryGb === null || dto.memoryGb === undefined || dto.memoryGb === 0) &&
-        (dto.diskGb === null || dto.diskGb === undefined || dto.diskGb === 0));
+    const temMedicao =
+      (dto.cpuPercent != null && Number.isFinite(dto.cpuPercent) && dto.cpuPercent !== 0) ||
+      (dto.memoryGb != null && Number.isFinite(dto.memoryGb) && dto.memoryGb !== 0) ||
+      (dto.diskGb != null && Number.isFinite(dto.diskGb) && dto.diskGb !== 0) ||
+      (dto.networkGb != null && Number.isFinite(dto.networkGb) && dto.networkGb !== 0);
+
+    const semMedicoes = !temMedicao;
 
     if (semMedicoes && dto.estadoColeta !== EstadoColetaEnum.FALHA) {
       dto.estadoColeta = EstadoColetaEnum.SEM_METRICAS;
