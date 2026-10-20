@@ -344,7 +344,13 @@ docker compose up --build
 </table>
 <p><a href="./docs/sprints/sprint-1.md">Registro da sprint e contribuições</a> · <a href="./docs/sprints/revisao-sprint-1.md">Evidências e pendências por item</a>.</p>
 <h4 id="burndownsprint1">📉 Burndown Sprint 1</h4>
-<p><a href="./docs/burndown-sprint-1.md">Base e regras preparadas</a>, com <a href="./docs/metricas/sprint-1/escopo.csv">baseline dos 13 itens</a> e ledger de aceites. O gráfico aguarda início real, corte e registros verificáveis; não foram inventadas datas históricas de conclusão.</p>
+<p align="center">
+  <img
+    src="./docs/GreenER_Burndown_Sprint1_Limpo.png"
+    alt="Burndown da Sprint 1"
+    width="850"
+  >
+</p>
 <hr>
 
 <h3 id="sprint2">⏱️ Sprint 2 — Cálculos Ambientais, Dashboard e Autenticação 🥈</h3>
