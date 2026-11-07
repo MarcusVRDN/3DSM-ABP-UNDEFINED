@@ -4,6 +4,8 @@ import { PrismaService } from '../../database/prisma.service';
 import { ServicosService } from '../servicos/servicos.service';
 import { normalizeMetricPayload } from '../../common/utils/external-api.util';
 
+const METRICS_FETCH_TIMEOUT_MS = 8000;
+
 @Injectable()
 export class MonitoramentoService implements OnModuleInit {
   private readonly logger = new Logger(MonitoramentoService.name);
@@ -18,7 +20,9 @@ export class MonitoramentoService implements OnModuleInit {
   async onModuleInit() {
     await this.prisma.verifySchema();
 
-    const configuredInterval = this.configService.get<string>('METRICS_POLL_INTERVAL_MS');
+    const configuredInterval = this.configService.get<string>(
+      'METRICS_POLL_INTERVAL_MS',
+    );
     const intervalMs = Number(configuredInterval ?? 30000);
     this.startPolling(intervalMs);
   }
@@ -40,7 +44,10 @@ export class MonitoramentoService implements OnModuleInit {
       await this.servicosService.syncServices();
       await this.collectMetricsForAllServices();
     } catch (error) {
-      this.logger.error('Erro ao executar monitoramento de serviços', error instanceof Error ? error.stack : error);
+      this.logger.error(
+        'Erro ao executar monitoramento de serviços',
+        error instanceof Error ? error.stack : error,
+      );
     }
   }
 
@@ -59,7 +66,10 @@ export class MonitoramentoService implements OnModuleInit {
     }
   }
 
-  private async collectMetricsForService(serviceIdExterno: string, servicoId: number) {
+  private async collectMetricsForService(
+    serviceIdExterno: string,
+    servicoId: number,
+  ) {
     const baseUrl = this.configService.get<string>('METRICS_API_URL');
     if (!baseUrl) {
       throw new Error('METRICS_API_URL não configurada.');
@@ -68,9 +78,26 @@ export class MonitoramentoService implements OnModuleInit {
     const url = `${baseUrl.replace(/\/+$/, '')}/metrics/${encodeURIComponent(serviceIdExterno)}`;
 
     try {
-      const response = await fetch(url, {
-        headers: { Accept: 'application/json' },
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(
+        () => controller.abort(),
+        METRICS_FETCH_TIMEOUT_MS,
+      );
+      let response: Response;
+      let payload: unknown;
+
+      try {
+        response = await fetch(url, {
+          headers: { Accept: 'application/json' },
+          signal: controller.signal,
+        });
+
+        if (response.ok) {
+          payload = await response.json();
+        }
+      } finally {
+        clearTimeout(timeout);
+      }
 
       if (!response.ok) {
         await this.prisma.servico.update({
@@ -95,9 +122,12 @@ export class MonitoramentoService implements OnModuleInit {
         return;
       }
 
-      const payload = await response.json();
       const metrics = normalizeMetricPayload(payload);
-      const hasMetrics = metrics && Object.values(metrics).some((value) => value != null && Number.isFinite(value) && value !== 0);
+      const hasMetrics =
+        metrics &&
+        Object.values(metrics).some(
+          (value) => value != null && Number.isFinite(value) && value !== 0,
+        );
 
       if (!hasMetrics) {
         await this.prisma.servico.update({
@@ -112,7 +142,8 @@ export class MonitoramentoService implements OnModuleInit {
           data: {
             servicoId,
             estadoColeta: 'SEM_METRICAS',
-            mensagemErro: 'Serviço respondeu, mas não retornou métricas válidas.',
+            mensagemErro:
+              'Serviço respondeu, mas não retornou métricas válidas.',
             iniciadaEm: new Date(),
             finalizadaEm: new Date(),
           },
@@ -139,11 +170,33 @@ export class MonitoramentoService implements OnModuleInit {
           memoryGb: metrics.memoryGb,
           diskGb: metrics.diskGb,
           networkGb: metrics.networkGb,
-          intervaloColetaSegundos: Number(this.configService.get<number>('METRICS_POLL_INTERVAL_MS') ?? 30000) / 1000,
+          intervaloColetaSegundos:
+            Number(
+              this.configService.get<number>('METRICS_POLL_INTERVAL_MS') ??
+                30000,
+            ) / 1000,
         },
       });
     } catch (error) {
-      this.logger.error(`Erro ao coletar métricas do serviço ${serviceIdExterno}`, error instanceof Error ? error.stack : error);
+      const isTimeout =
+        typeof error === 'object' &&
+        error !== null &&
+        'name' in error &&
+        error.name === 'AbortError';
+      const errorMessage = isTimeout
+        ? `Tempo limite de ${METRICS_FETCH_TIMEOUT_MS}ms excedido ao consultar métricas do serviço ${serviceIdExterno}.`
+        : error instanceof Error
+          ? error.message
+          : 'Erro ao consultar métricas.';
+
+      if (isTimeout) {
+        this.logger.warn(errorMessage);
+      } else {
+        this.logger.error(
+          `Erro ao coletar métricas do serviço ${serviceIdExterno}`,
+          error instanceof Error ? error.stack : error,
+        );
+      }
 
       await this.prisma.servico.update({
         where: { id: servicoId },
@@ -157,8 +210,8 @@ export class MonitoramentoService implements OnModuleInit {
         data: {
           servicoId,
           estadoColeta: 'FALHA',
-          codigoErro: 'FETCH_ERROR',
-          mensagemErro: error instanceof Error ? error.message : 'Erro ao consultar métricas.',
+          codigoErro: isTimeout ? 'TIMEOUT' : 'FETCH_ERROR',
+          mensagemErro: errorMessage,
           iniciadaEm: new Date(),
           finalizadaEm: new Date(),
         },

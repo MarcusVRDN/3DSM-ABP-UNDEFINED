@@ -183,6 +183,7 @@ describe('Descoberta e retomada do monitoramento de serviços', () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
@@ -326,6 +327,60 @@ describe('Descoberta e retomada do monitoramento de serviços', () => {
       ]);
     },
   );
+
+  it('aborta uma coleta após timeout e continua com os demais serviços', async () => {
+    jest.useFakeTimers();
+    const timedOutService = seedService('DESCONHECIDO', 'slow-api');
+    const nextService = seedService('DESCONHECIDO', 'healthy-api');
+    const warnSpy = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+    fetchMock.mockImplementation((input, init) => {
+      const requestUrl =
+        typeof input === 'string'
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url;
+
+      if (requestUrl.includes('slow-api')) {
+        return new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener(
+            'abort',
+            () => reject(new DOMException('Aborted', 'AbortError')),
+            { once: true },
+          );
+        });
+      }
+
+      return Promise.resolve(
+        Response.json({ metrics: { cpu_percent: 25, memory_gb: 2 } }),
+      );
+    });
+
+    const collectionCycle = monitoramentoService.collectMetricsForAllServices();
+    await jest.advanceTimersByTimeAsync(8000);
+    await collectionCycle;
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0][1]?.signal?.aborted).toBe(true);
+    expect(timedOutService.estadoAtual).toBe('INDISPONIVEL');
+    expect(nextService.estadoAtual).toBe('DISPONIVEL');
+    expect(collections).toEqual([
+      expect.objectContaining({
+        servicoId: timedOutService.id,
+        estadoColeta: 'FALHA',
+      }),
+      expect.objectContaining({
+        servicoId: nextService.id,
+        estadoColeta: 'SUCESSO',
+      }),
+    ]);
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Tempo limite de 8000ms excedido ao consultar métricas do serviço slow-api.',
+    );
+    expect(jest.getTimerCount()).toBe(0);
+  });
 
   it('preserva os estados quando a descoberta falha por erro de rede', async () => {
     const service = seedService('DISPONIVEL');
