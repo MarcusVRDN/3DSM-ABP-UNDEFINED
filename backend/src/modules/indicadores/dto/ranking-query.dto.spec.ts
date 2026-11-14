@@ -34,6 +34,12 @@ describe("RankingQueryDto", () => {
     expect(errors.map((error) => error.property)).toContain("limite");
   });
 
+  it("rejeita limite fracionário", async () => {
+    const errors = await validar({ limite: 1.5 });
+
+    expect(errors.map((error) => error.property)).toContain("limite");
+  });
+
   it("rejeita uma métrica desconhecida", async () => {
     const errors = await validar({ metrica: "agua" });
 
