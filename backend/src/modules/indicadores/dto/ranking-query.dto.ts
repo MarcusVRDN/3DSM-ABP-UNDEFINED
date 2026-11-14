@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsNumber, IsOptional, Max, Min } from "class-validator";
+import { IsEnum, IsInt, IsOptional, Max, Min } from "class-validator";
 import { PeriodoDto } from "./periodo.dto";
 
 export enum MetricaRanking {
@@ -16,12 +16,13 @@ export class RankingQueryDto extends PeriodoDto {
 
   @ApiPropertyOptional({
     type: Number,
+    format: "int32",
     minimum: 1,
     maximum: 100,
     default: 10,
   })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @Min(1)
   @Max(100)
   @Type(() => Number)
