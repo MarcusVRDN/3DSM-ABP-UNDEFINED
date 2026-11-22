@@ -12,6 +12,7 @@ export type ServiceHistoryPoint = {
   inicio: string;
   energiaKwh: number | null;
   emissaoGCo2e: number | null;
+  selo: string;
   componentes?: ComponentesEnergia | null;
   coletas?: number | null;
   ativo?: number;
@@ -81,6 +82,7 @@ function isBackendService(value: unknown): value is BackendService {
     value.id > 0 &&
     typeof value.idExterno === 'string' &&
     typeof value.nome === 'string' &&
+    typeof value.selo === 'string' &&
     typeof value.regiaoCodigo === 'string' &&
     isServiceStatus(value.estadoAtual) &&
     isServiceLocation(value.localizacao)
@@ -124,6 +126,7 @@ function parseHistory(value: unknown): ServiceHistoryPoint[] {
       !isRecord(point) ||
       typeof point.inicio !== 'string' ||
       !Number.isFinite(Date.parse(point.inicio)) ||
+      typeof point.selo !== 'string' ||
       !('energiaKwh' in point) ||
       !isNullableNumber(point.energiaKwh) ||
       !('emissaoGCo2e' in point) ||
@@ -148,6 +151,7 @@ function parseHistory(value: unknown): ServiceHistoryPoint[] {
       energiaKwh: point.energiaKwh === null ? null : Number(point.energiaKwh),
       emissaoGCo2e:
         point.emissaoGCo2e === null ? null : Number(point.emissaoGCo2e),
+      selo: point.selo,
       ...('componentes' in point
         ? {
             componentes: isComponentesEnergia(point.componentes)

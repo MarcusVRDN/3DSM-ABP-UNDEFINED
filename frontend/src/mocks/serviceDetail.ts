@@ -42,6 +42,7 @@ export function getDemoServiceDetail(
         inicio,
         energiaKwh: null,
         emissaoGCo2e: null,
+        selo: 'A',
         componentes: null,
         coletas: coletas === 0 ? null : coletas,
         ativo: 0,
@@ -62,6 +63,7 @@ export function getDemoServiceDetail(
       inicio,
       energiaKwh: energyPerInterval,
       emissaoGCo2e,
+      selo: 'A',
       componentes: demoComponentes,
       coletas: ativo + indisponivel + semMetricas,
       ativo,
@@ -76,6 +78,7 @@ export function getDemoServiceDetail(
     id: service.servicoId,
     idExterno: `demo-${service.servicoId}`,
     nome: service.nome,
+    selo: 'A',
     regiaoCodigo: service.regiaoCodigo,
     localizacao: {
       pais,

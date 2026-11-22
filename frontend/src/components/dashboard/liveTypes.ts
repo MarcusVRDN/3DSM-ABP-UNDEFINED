@@ -5,6 +5,7 @@ export type BackendService = {
   id: number;
   idExterno: string;
   nome: string;
+  selo: string;
   regiaoCodigo: string;
   localizacao?: ServiceLocation | null;
   estadoAtual:

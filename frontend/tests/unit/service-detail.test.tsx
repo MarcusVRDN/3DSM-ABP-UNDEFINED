@@ -9,6 +9,7 @@ const service = {
   id: 4,
   idExterno: 'search-api',
   nome: 'Search API',
+  selo: 'A',
   regiaoCodigo: 'us-east',
   localizacao: null,
   estadoAtual: 'DISPONIVEL',
@@ -36,6 +37,7 @@ describe('fetchServiceDetail', () => {
             inicio: '2026-11-15T14:00:00.000Z',
             energiaKwh: 1.25,
             emissaoGCo2e: 1200,
+            selo: 'A',
           },
         ]);
       }
@@ -66,6 +68,7 @@ describe('fetchServiceDetail', () => {
           inicio: '2026-11-15T14:00:00.000Z',
           energiaKwh: 1.25,
           emissaoGCo2e: 1200,
+          selo: 'A',
         },
       ],
     });
@@ -102,6 +105,7 @@ describe('fetchServiceDetail', () => {
             inicio: '2026-11-15T14:00:00.000Z',
             energiaKwh: 1.25,
             emissaoGCo2e: 1200,
+            selo: 'A',
             coletas: 12,
             ativo: 10,
             indisponivel: 1,
@@ -126,6 +130,7 @@ describe('fetchServiceDetail', () => {
         inicio: '2026-11-15T14:00:00.000Z',
         energiaKwh: 1.25,
         emissaoGCo2e: 1200,
+        selo: 'A',
         coletas: 12,
         ativo: 10,
         indisponivel: 1,
@@ -142,11 +147,13 @@ describe('summarizeServiceHistory', () => {
         inicio: '2026-11-15T13:00:00.000Z',
         energiaKwh: 0.25,
         emissaoGCo2e: 750,
+        selo: 'A',
       },
       {
         inicio: '2026-11-15T14:00:00.000Z',
         energiaKwh: null,
         emissaoGCo2e: 1250,
+        selo: 'A',
       },
     ]);
 
@@ -171,6 +178,7 @@ describe('summarizeServiceHistory', () => {
         inicio: '2026-11-15T13:00:00.000Z',
         energiaKwh: null,
         emissaoGCo2e: null,
+        selo: 'A',
       },
     ]);
 

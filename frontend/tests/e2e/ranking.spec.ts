@@ -2,14 +2,28 @@ import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { rankingDemo } from '../../src/mocks/ranking';
 
+function comSeloA(resposta: ReturnType<typeof rankingDemo>) {
+  return {
+    ...resposta,
+    itens: resposta.itens.map((item) => ({ ...item, selo: 'A' })),
+    semDados: resposta.semDados.map((item) => ({ ...item, selo: 'A' })),
+    variacaoPorServico: resposta.variacaoPorServico?.map((item) => ({
+      ...item,
+      selo: 'A',
+    })),
+  };
+}
+
 async function simularRanking(page: Page) {
   const consultas: URLSearchParams[] = [];
   await page.route('**/api/ranking**', (route) => {
     const params = new URL(route.request().url()).searchParams;
     consultas.push(params);
     return route.fulfill({
-      json: rankingDemo(
-        params.get('metrica') === 'emissao' ? 'emissao' : 'energia',
+      json: comSeloA(
+        rankingDemo(
+          params.get('metrica') === 'emissao' ? 'emissao' : 'energia',
+        ),
       ),
     });
   });
@@ -63,6 +77,7 @@ test('compara janelas com texto e ícone e permite ordenar todas as colunas', as
       {
         servicoId: 1,
         nome: 'Alpha',
+        selo: 'A',
         emissaoAtualGCo2e: 80,
         emissaoAnteriorGCo2e: 100,
         diferencaGCo2e: -20,
@@ -71,6 +86,7 @@ test('compara janelas com texto e ícone e permite ordenar todas as colunas', as
       {
         servicoId: 2,
         nome: 'Beta',
+        selo: 'A',
         emissaoAtualGCo2e: 120,
         emissaoAnteriorGCo2e: 50,
         diferencaGCo2e: 70,
@@ -79,6 +95,7 @@ test('compara janelas com texto e ícone e permite ordenar todas as colunas', as
       {
         servicoId: 3,
         nome: 'Novo',
+        selo: 'A',
         emissaoAtualGCo2e: 10,
         emissaoAnteriorGCo2e: null,
         diferencaGCo2e: null,
@@ -87,7 +104,7 @@ test('compara janelas com texto e ícone e permite ordenar todas as colunas', as
     ],
   };
   await page.route('**/api/ranking**', (route) =>
-    route.fulfill({ json: dados }),
+    route.fulfill({ json: comSeloA(dados) }),
   );
   await page.goto('/ranking?periodo=7d');
   await expect(
@@ -172,7 +189,9 @@ test('mantém o ranking na tela enquanto atualiza a métrica', async ({
       await espera;
     }
     return route.fulfill({
-      json: rankingDemo(metrica === 'emissao' ? 'emissao' : 'energia'),
+      json: comSeloA(
+        rankingDemo(metrica === 'emissao' ? 'emissao' : 'energia'),
+      ),
     });
   });
   await page.goto('/ranking');
@@ -197,7 +216,7 @@ test('lista os serviços sem dados e mostra os estados vazios', async ({
   page,
 }) => {
   const { periodo } = rankingDemo('energia');
-  let semDados = [{ servicoId: 6, nome: 'Notification Worker' }];
+  let semDados = [{ servicoId: 6, nome: 'Notification Worker', selo: 'A' }];
   await page.route('**/api/ranking**', (route) =>
     route.fulfill({
       json: { periodo, metrica: 'energia', itens: [], semDados },
@@ -227,7 +246,7 @@ test('erro do backend mostra a mensagem e permite tentar de novo', async ({
     chamadas += 1;
     return chamadas === 1
       ? route.fulfill({ status: 500 })
-      : route.fulfill({ json: rankingDemo('energia') });
+      : route.fulfill({ json: comSeloA(rankingDemo('energia')) });
   });
 
   await page.goto('/ranking');

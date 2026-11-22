@@ -8,6 +8,7 @@ const service: LiveService = {
   id: 1,
   idExterno: 'api',
   nome: 'API de pagamentos',
+  selo: 'A',
   regiaoCodigo: 'br-sudeste',
   localizacao: { pais: 'Brasil', regiao: 'Sudeste', cidade: 'São Paulo' },
   estadoAtual: 'DISPONIVEL',
